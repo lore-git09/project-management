@@ -5,22 +5,16 @@ import java.util.UUID;
 
 import com.my_training.pma.entities.Employee;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ProjectDTO {
 
-	
-	private UUID id;
-    private String name;
-	private String stage;
-	private String description;
-	private Set<Employee> employeeList;
-	
-	
-	
+public record ProjectDTO(
+		UUID id,
+
+		 String name,
+		 String stage,
+		 String description,
+		Set<Employee> employeeList
+) {
+
 }

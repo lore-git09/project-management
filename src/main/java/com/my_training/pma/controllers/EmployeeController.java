@@ -3,6 +3,8 @@ package com.my_training.pma.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import com.my_training.pma.businesslogic.ProjectService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,69 +18,42 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.my_training.pma.businesslogic.EmployeeDTO;
 import com.my_training.pma.businesslogic.EmployeeService;
-
 @RestController
-@RequestMapping("/api/")
+@RequestMapping("/api/employee/")
 public class EmployeeController {
 
-	@Autowired
-	EmployeeService empService;
-	
-	
-	@PostMapping("employee/")
-	public UUID create(@RequestBody EmployeeDTO empDTO) {
-		return empService.createEmployee(empDTO);
+	private final EmployeeService employeeService;
+
+	public EmployeeController(EmployeeService employeeService){
+		this.employeeService= employeeService;
 	}
 	
-	@GetMapping("employee/")
-	public List<EmployeeDTO> findAll(){
-		return empService.findAll();
+	
+	@PostMapping()
+	public UUID createNewEmployee(@RequestBody @Valid EmployeeDTO empDTO) {
+		return employeeService.saveNewEmployee(empDTO);
 	}
 	
-	@GetMapping("employee/{employeeID}")
+	@GetMapping()
+	public List<EmployeeDTO> getAllEmployees(){
+		return employeeService.getAllEmployees();
+	}
+	
+	@GetMapping("{id}")
 	public EmployeeDTO findOne(
-			@PathVariable("employeeID") UUID employeeID){
-		return empService.findOne(employeeID);
+			@PathVariable("id") UUID employeeID){
+		return employeeService.getEmployeeById(employeeID);
 	}
 	
-	@PutMapping("employee/{employeeID}")
-	public void update(@PathVariable("employeeID") UUID employeeID, @RequestBody EmployeeDTO newEmpDTO) {
-		empService.update(newEmpDTO, employeeID);
+	@PutMapping("{id}")
+	public void updateEmployeById(@PathVariable("id") UUID employeeID, @RequestBody @Valid EmployeeDTO newEmpDTO) {
+		employeeService.updateEmployeById(newEmpDTO, employeeID);
 		
 	}
 	
-	@DeleteMapping("employee/{employeeID}")
-	public void delete(@RequestParam("employeeID") UUID employeeID) {
-	empService.delete(employeeID);
+	@DeleteMapping("{id}")
+	public void deleteEmployeById(@RequestParam("id") UUID employeeID) {
+		employeeService.deleteEmployeById(employeeID);
 	}
-	
-	
-	
-//	public String employeeList(Model model ) {
-//		
-// List<EmployeeDTO>employees= empService.findAll();
-//		
-//		model.addAttribute("employees", employees);
-//		return "employees/list-employees";
-//	}
-//	
-//	
-//	@GetMapping("/new")
-//	public String displayEmployeeForm( Model model ) {
-//		
-//		EmployeeDTO anEmployee= new EmployeeDTO();
-//		
-//		model.addAttribute("employee", anEmployee);
-//		
-//		return "employees/new-employee";
-//	}
-//	
-//	@PostMapping("/save")
-//	public String createProject(EmployeeDTO newEmployeeDTO, Model model) {
-//		empService.createEmployee(newEmployeeDTO);
-//		
-//		return "redirect:/employees/new";
-//	}
-//	
-//	
+
 }

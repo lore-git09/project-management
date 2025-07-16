@@ -2,7 +2,6 @@ package com.my_training.pma.entities;
 
 import java.util.UUID;
 
-import org.hibernate.type.EnumType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;

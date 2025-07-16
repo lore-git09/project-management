@@ -1,9 +1,12 @@
 package com.my_training.pma.businesslogic;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.my_training.pma.entities.EProjectStage;
+import com.my_training.pma.exception.ResourceNotFound;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,41 +24,66 @@ public class ProjectService {
 	ProjectRepository projectRepository;
 	
 	
-	public UUID createProject(ProjectDTO newProjectdto) {
-		ModelMapper modelMapper = new ModelMapper();
-		Project newProject = modelMapper.map(newProjectdto, Project.class);
-		
-		return projectRepository.save(newProject).getId();		
+	public UUID saveNewProject(ProjectDTO newProjectdto) {
+		Project p = new Project();
+		p.setName(newProjectdto.name());
+		p.setStage(EProjectStage.valueOf(newProjectdto.stage()));
+		p.setDescription(newProjectdto.description());
+		p.setEmployees(newProjectdto.employeeList());
+		return projectRepository.save(p).getId();
 	}
 	
-	public List<ProjectDTO> findAll(){
+	public List<ProjectDTO> getAllProjects(){
 		
 		List<ProjectDTO> projectList = new ArrayList<>();
-		projectRepository.findAll().forEach(p->projectList.add(new ModelMapper().map(p, ProjectDTO.class)));
+		projectRepository.findAll().forEach(
+				p->{
+					ProjectDTO pro =new ProjectDTO(
+							p.getId(),
+							p.getName(),
+							p.getStage().toString(),
+							p.getDescription(),
+							p.getEmployees()
+					);
+					projectList.add(pro);
+				});
 		return projectList; 
 	}
 	
-	public ProjectDTO findOne (UUID projectID) {
-		ProjectDTO projectDTO = new ProjectDTO();
-			
-			ModelMapper modelMapper = new ModelMapper();
-			projectDTO =  modelMapper.map(projectRepository.findById(projectID).get(), ProjectDTO.class);
-			return projectDTO;
+	public ProjectDTO getProjectById (UUID id) {
+		return projectRepository.findById(id).map(
+				p-> new ProjectDTO(
+							p.getId(),
+							p.getName(),
+							p.getStage().toString(),
+							p.getDescription(),
+							p.getEmployees()
+					)
+		).orElseThrow(()-> new ResourceNotFound( "Project with id: "+ id + " does'nt exist"));
 		}
 
-		public void update(ProjectDTO newProjectDTO, UUID projectID) {
-			
-			Project newProject = projectRepository.findById(projectID).get();
-			
-			ModelMapper mapper = new ModelMapper();
-			newProject= mapper.map(newProjectDTO, Project.class);
-			
-			projectRepository.save(newProject);
+		public void updateProjectById(ProjectDTO newProjectDTO, UUID id) {
+			Project project = projectRepository.findById(id)
+					.orElseThrow(()-> new ResourceNotFound( "Project with id: "+ id + " does'nt exist"));
+
+			if(newProjectDTO.name() !=null && !newProjectDTO.name().equals(project.getName())){
+				project.setName(newProjectDTO.name());
+			}
+			if(newProjectDTO.description() !=null && !newProjectDTO.description().equals(project.getDescription())){
+				project.setDescription(newProjectDTO.description());
+			}
+			if(newProjectDTO.stage() !=null){
+				project.setStage(EProjectStage.valueOf(newProjectDTO.stage()));
+			}
+			projectRepository.save(project);
 		}
 
+		public void  deleteProjectById(UUID id){
+			Project project = projectRepository.findById(id)
+					.orElseThrow(()-> new ResourceNotFound( "Project with id: "+ id + " does'nt exist"));
+			project.setDeletedAt(Instant.now());
+			projectRepository.save(project);
 
-		public void delete(UUID projectID) {
-			projectRepository.deleteById(projectID);
 		}
 
 	

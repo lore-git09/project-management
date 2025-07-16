@@ -1,34 +1,40 @@
 package com.my_training.pma.entities;
 
+import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 public class Employee {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private UUID id;
-	
+
+	 @Column(nullable = false)
 	private String firstName;
+	@Column(nullable = false)
 	private String lastName;
+	@Column(nullable = false)
 	private String email;
-	
+
+	public Employee(){
+
+	}
+	public Employee(String firstName, String lastName, String email, Project project) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.project = project;
+	}
+
 	@ManyToOne
 	private Project project;
 
@@ -72,7 +78,19 @@ public class Employee {
 		this.project = project;
 	}
 
-	
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+		Employee employee = (Employee) o;
+		return Objects.equals(id, employee.id) && Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) && Objects.equals(email, employee.email) && Objects.equals(project, employee.project);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, firstName, lastName, email, project);
+	}
+
+
 
 }
